@@ -20,15 +20,15 @@ import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPriority;
 
 
-public class visualmetronomeTileOverlay extends Overlay
+public class AttackTimerMetronomeTileOverlay extends Overlay
 {
 
     private final Client client;
-    private final visualmetronomeConfig config;
-    private final visualmetronomePlugin plugin;
+    private final AttackTimerMetronomeConfig config;
+    private final AttackTimerMetronomePlugin plugin;
 
     @Inject
-    public visualmetronomeTileOverlay(Client client, visualmetronomeConfig config, visualmetronomePlugin plugin)
+    public AttackTimerMetronomeTileOverlay(Client client, AttackTimerMetronomeConfig config, AttackTimerMetronomePlugin plugin)
     {
         super(plugin);
         this.client = client;
@@ -43,6 +43,10 @@ public class visualmetronomeTileOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics)
     {
+        if (plugin.attackState != AttackTimerMetronomePlugin.AttackState.DELAYED) {
+            return null;
+        }
+
         if (config.highlightCurrentTile())
         {
             final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();

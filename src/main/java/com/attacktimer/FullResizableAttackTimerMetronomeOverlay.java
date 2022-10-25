@@ -9,17 +9,17 @@ import javax.inject.Inject;
 import net.runelite.api.Point;
 import net.runelite.client.ui.overlay.OverlayUtil;
 
-public class FullResizableVisualMetronomeOverlay extends Overlay
+public class FullResizableAttackTimerMetronomeOverlay extends Overlay
 {
 
-    private final visualmetronomeConfig config;
-    private final visualmetronomePlugin plugin;
+    private final AttackTimerMetronomeConfig config;
+    private final AttackTimerMetronomePlugin plugin;
 
     private static int TITLE_PADDING = 10;
     private static final int MINIMUM_SIZE = 16; // too small and resizing becomes impossible, requiring a reset
 
     @Inject
-    public FullResizableVisualMetronomeOverlay(visualmetronomeConfig config, visualmetronomePlugin plugin)
+    public FullResizableAttackTimerMetronomeOverlay(AttackTimerMetronomeConfig config, AttackTimerMetronomePlugin plugin)
     {
         super(plugin);
         this.config = config;

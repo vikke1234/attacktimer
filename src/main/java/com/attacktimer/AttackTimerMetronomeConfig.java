@@ -9,13 +9,13 @@ import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Keybind;
 import java.awt.Color;
 
-@ConfigGroup("visualmetronome")
-public interface visualmetronomeConfig extends Config
+@ConfigGroup("attacktimermetronome")
+public interface AttackTimerMetronomeConfig extends Config
 {
 	@ConfigItem(
 			position = 1,
 			keyName = "enableMetronome",
-			name = "Visual Metronome",
+			name = "Attack Timer Metronome",
 			description = "Enable visual metronome"
 	)
 	default boolean enableMetronome()

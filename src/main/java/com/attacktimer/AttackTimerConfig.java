@@ -14,6 +14,6 @@ public interface AttackTimerConfig extends Config
 	)
 	default String greeting()
 	{
-		return "Hello";
+		return "Hello2";
 	}
 }
