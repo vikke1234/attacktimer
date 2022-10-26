@@ -7,7 +7,6 @@ public class AttackTimerPluginTest
 {
 	public static void main(String[] args) throws Exception
 	{
-		ExternalPluginManager.loadBuiltin(AttackTimerPlugin.class);
 		ExternalPluginManager.loadBuiltin(AttackTimerMetronomePlugin.class);
 		RuneLite.main(args);
 	}

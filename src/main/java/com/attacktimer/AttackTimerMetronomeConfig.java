@@ -175,171 +175,56 @@ public interface AttackTimerMetronomeConfig extends Config
 		return 2;
 	}
 
-
 	@ConfigSection(
-			name = "Color Settings",
+			name = "Attack Bar",
 			description = "Change the colors and number of colors to cycle through",
 			position = 7
 	)
-	String ColorSettings = "Color Settings";
+	String AttackBarSettings = "Attack Cooldown Bar Settings";
 
-
-	@Range(
-			min = 2,
-			max = 10
-	)
 	@ConfigItem(
 			position = 1,
-			keyName = "colorCycle",
-			name = "Number of Colors",
-			description = "The number of colors it cycles through",
-			section = ColorSettings
+			keyName = "attackBar",
+			name = "Show Attack Bar",
+			description = "Show the attack bar",
+			section = AttackBarSettings
 	)
-	default int colorCycle()
-	{
-		return 2;
-	}
+	default boolean showBar() { return false; }
 
-	@Alpha
 	@ConfigItem(
 			position = 2,
-			keyName = "tickColor",
-			name = "Tick Color",
-			description = "Configures the color of tick",
-			section = ColorSettings
+			keyName = "attackBarHeightOffset",
+			name = "Height Offset",
+			description = "Height offset for the bar from top of player model",
+			section =AttackBarSettings
 	)
-	default Color getTickColor()
-	{
-		return Color.WHITE;
-	}
+	default int heightOffset() { return 0; }
 
-	@Alpha
 	@ConfigItem(
 			position = 3,
-			keyName = "tockColor",
-			name = "Tock Color",
-			description = "Configures the color of tock",
-			section = ColorSettings
+			keyName = "attackBarEmpties",
+			name = "Empties Before Attack",
+			description = "Controls whether the attack bar will fully empty before a new attack can occur",
+			section =AttackBarSettings
 	)
-	default Color getTockColor()
-	{
-		return Color.GRAY;
-	}
+	default boolean barEmpties() { return true; }
 
-	@Alpha
 	@ConfigItem(
 			position = 4,
-			keyName = "tick3Color",
-			name = "3rd Tick Color",
-			description = "Configures the color of 3rd tick if enabled",
-			section = ColorSettings
+			keyName = "attackBarFills",
+			name = "Fills Before Attack",
+			description = "Controls whether the attack bar will fill completely after an attack",
+			section =AttackBarSettings
 	)
-	default Color getTick3Color()
-	{
-		return Color.DARK_GRAY;
-	}
-	@Alpha
+	default boolean barFills() { return true; }
+
 	@ConfigItem(
 			position = 5,
-			keyName = "tick4Color",
-			name = "4th Tick Color",
-			description = "Configures the color of the 4th tick if enabled",
-			section = ColorSettings
+			keyName = "attackBarDirection",
+			name = "Attack Bar Fills or Drains",
+			description = "Controls whether the attack bar will fill or drain as a cooldown",
+			section =AttackBarSettings
 	)
-	default Color getTick4Color()
-	{
-		return Color.BLACK;
-	}
-	@Alpha
-	@ConfigItem(
-			position = 6,
-			keyName = "tick5Color",
-			name = "5th Tick Color",
-			description = "Configures the color of the 5th tick if enabled",
-			section = ColorSettings
-	)
-	default Color getTick5Color()
-	{
-		return new Color(112, 131, 255);
-	}
-	@Alpha
-	@ConfigItem(
-			position = 7,
-			keyName = "tick6Color",
-			name = "6th Tick Color",
-			description = "Configures the color of the 6th tick if enabled",
-			section = ColorSettings
-	)
-	default Color getTick6Color()
-	{
-		return new Color(0, 23, 171);
-	}
-	@Alpha
-	@ConfigItem(
-			position = 8,
-			keyName = "tick7Color",
-			name = "7th Tick Color",
-			description = "Configures the color of the 7th tick if enabled",
-			section = ColorSettings
-	)
-	default Color getTick7Color()
-	{
-		return new Color(107, 255, 124);
-	}
-	@Alpha
-	@ConfigItem(
-			position = 9,
-			keyName = "tick8Color",
-			name = "8th Tick Color",
-			description = "Configures the color of the 8th tick if enabled",
-			section = ColorSettings
-	)
-	default Color getTick8Color()
-	{
-		return new Color(0, 191, 22);
-	}
-	@Alpha
-	@ConfigItem(
-			position = 10,
-			keyName = "tick9Color",
-			name = "9th Tick Color",
-			description = "Configures the color of the 9th tick if enabled",
-			section = ColorSettings
-	)
-	default Color getTick9Color()
-	{
-		return new Color(255, 105, 94);
-	}
-	@Alpha
-	@ConfigItem(
-			position = 11,
-			keyName = "tick10Color",
-			name = "10th Tick Color",
-			description = "Configures the color of the 10th tick if enabled",
-			section = ColorSettings
-	)
-	default Color getTick10Color()
-	{
-		return new Color(255, 17, 0);
-	}
-
-	@ConfigSection(
-			name = "Hotkey Settings",
-			description = "Settings that use hotkeys",
-			position = 8
-	)
-	String HotkeySettings = "Hotkey Settings";
-
-	@ConfigItem(
-			position = 1,
-			keyName = "tickResetHotkey",
-			name = "Tick Cycle Reset Hotkey",
-			description = "Hotkey to reset the tick cycle back to 0",
-			section = HotkeySettings
-	)
-	default Keybind tickResetHotkey() {
-		return Keybind.NOT_SET;
-	}
-
+	default boolean barDirection() { return true; }
 }
 

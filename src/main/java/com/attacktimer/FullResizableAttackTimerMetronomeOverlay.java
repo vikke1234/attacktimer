@@ -32,6 +32,11 @@ public class FullResizableAttackTimerMetronomeOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics)
     {
+        if (plugin.attackState != AttackTimerMetronomePlugin.AttackState.DELAYED) {
+            return null;
+        }
+
+        int ticksRemaining = plugin.getTicksUntilNextAttack();
         Dimension preferredSize = getPreferredSize();
 
         if (preferredSize == null)
@@ -44,6 +49,7 @@ public class FullResizableAttackTimerMetronomeOverlay extends Overlay
         if (config.enableMetronome())
         {
             graphics.setColor(plugin.CurrentColor);
+            // Parition the rectangle by color here
             graphics.fillRect(0, 0, preferredSize.width, preferredSize.height);
             TITLE_PADDING = (Math.min(preferredSize.width, preferredSize.height) / 2 - 4); // scales tick number position with box size
 
@@ -52,10 +58,12 @@ public class FullResizableAttackTimerMetronomeOverlay extends Overlay
                 if (config.disableFontScaling())
                 {
                     graphics.setColor(config.NumberColor());
-                    graphics.drawString(String.valueOf(plugin.tickCounter), TITLE_PADDING, preferredSize.height - TITLE_PADDING);
-                }
-                else
-                    {
+
+                    // Show count down instead.
+                    // plugin.tickCounter => ticksRemaining
+                    graphics.drawString(String.valueOf(ticksRemaining), TITLE_PADDING, preferredSize.height - TITLE_PADDING);
+                } else {
+
                     if (config.fontType() == FontTypes.REGULAR)
                     {
                         graphics.setFont(new Font(FontManager.getRunescapeFont().getName(), Font.PLAIN, Math.min(preferredSize.width, preferredSize.height))); //scales font size based on the size of the metronome
@@ -66,7 +74,7 @@ public class FullResizableAttackTimerMetronomeOverlay extends Overlay
                     }
 
                     final Point tickCounterPoint = new Point(preferredSize.width / 3, preferredSize.height);
-                    OverlayUtil.renderTextLocation(graphics, tickCounterPoint, String.valueOf(plugin.tickCounter), config.NumberColor());
+                    OverlayUtil.renderTextLocation(graphics, tickCounterPoint, String.valueOf(ticksRemaining), config.NumberColor());
                 }
             }
         }

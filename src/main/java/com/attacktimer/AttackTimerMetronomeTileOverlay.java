@@ -37,7 +37,6 @@ public class AttackTimerMetronomeTileOverlay extends Overlay
         setPosition(OverlayPosition.DYNAMIC);
         setLayer(OverlayLayer.UNDER_WIDGETS);
         setPriority(OverlayPriority.MED);
-
     }
 
     @Override
@@ -78,7 +77,11 @@ public class AttackTimerMetronomeTileOverlay extends Overlay
             final int height = client.getLocalPlayer().getLogicalHeight()+20;
             final LocalPoint localLocation = client.getLocalPlayer().getLocalLocation();
             final Point playerPoint = Perspective.localToCanvas(client, localLocation, client.getPlane(), height);
-            OverlayUtil.renderTextLocation(graphics, playerPoint, String.valueOf(plugin.tickCounter), config.NumberColor());
+
+            // Countdown ticks instead of up.
+            // plugin.tickCounter => ticksRemaining
+            int ticksRemaining = plugin.getTicksUntilNextAttack();
+            OverlayUtil.renderTextLocation(graphics, playerPoint, String.valueOf(ticksRemaining), config.NumberColor());
         }
 
         return null;

@@ -2,19 +2,16 @@ package com.attacktimer;
 
 import com.google.inject.Provides;
 import net.runelite.api.*;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.InteractingChanged;
+import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.plugins.itemstats.FoodBase;
 import net.runelite.client.ui.overlay.OverlayManager;
 import javax.inject.Inject;
-import java.awt.event.KeyEvent;
-import net.runelite.client.input.KeyListener;
-import net.runelite.client.input.KeyManager;
 import net.runelite.http.api.item.ItemEquipmentStats;
 import net.runelite.http.api.item.ItemStats;
 
@@ -25,12 +22,12 @@ import java.awt.*;
         description = "Shows a visual cue on an overlay every game tick to help timing based activities",
         tags = {"timers", "overlays", "tick", "skilling"}
 )
-public class AttackTimerMetronomePlugin extends Plugin implements KeyListener
+public class AttackTimerMetronomePlugin extends Plugin
 {
     public enum AttackState {
         NOT_ATTACKING,
         DELAYED,
-        PENDING,
+        //PENDING,
     };
 
     @Inject
@@ -46,10 +43,10 @@ public class AttackTimerMetronomePlugin extends Plugin implements KeyListener
     private FullResizableAttackTimerMetronomeOverlay overlay;
 
     @Inject
-    private AttackTimerMetronomeConfig config;
+    private AttackTimerBarOverlay barOverlay;
 
     @Inject
-    private KeyManager keyManager;
+    private AttackTimerMetronomeConfig config;
 
     @Inject
     private ItemManager itemManager;
@@ -57,19 +54,24 @@ public class AttackTimerMetronomePlugin extends Plugin implements KeyListener
     @Inject
     private Client client;
 
-    private boolean CurrentTick = true;
-    public int tickCounter = 0;
     public int tickPeriod = 0;
 
     final int ATTACK_DELAY_NONE = 0;
 
-    public int attackDelayTicks = ATTACK_DELAY_NONE;
+    private int uiUnshowDebounceTickCount = 0;
+    private int uiUnshowDebounceTicksMax = 1;
+
+    public int attackDelayHoldoffTicks = ATTACK_DELAY_NONE;
 
     public AttackState attackState = AttackState.NOT_ATTACKING;
 
     public Color CurrentColor = Color.WHITE;
 
-    public Dimension DEFAULT_SIZE = new Dimension(25, 25);
+    public int DEFAULT_SIZE_UNIT_PX = 25;
+
+    private final int DEFAULT_FOOD_ATTACK_DELAY_TICKS = 3;
+    private final int KARAMBWAN_ATTACK_DELAY_TICKS = 2;
+    public Dimension DEFAULT_SIZE = new Dimension(DEFAULT_SIZE_UNIT_PX, DEFAULT_SIZE_UNIT_PX);
 
     @Provides
     AttackTimerMetronomeConfig provideConfig(ConfigManager configManager)
@@ -88,12 +90,31 @@ public class AttackTimerMetronomePlugin extends Plugin implements KeyListener
                 EquipmentInventorySlot.WEAPON.getSlotIdx());
     }
 
+    private AttackStyle getAttackStyle()
+    {
+        final int currentAttackStyleVarbit = client.getVarpValue(VarPlayer.ATTACK_STYLE);
+        final int currentEquippedWeaponTypeVarbit = client.getVarbitValue(Varbits.EQUIPPED_WEAPON_TYPE);
+        AttackStyle[] attackStyles = WeaponType.getWeaponType(currentEquippedWeaponTypeVarbit).getAttackStyles();
+
+        if (currentAttackStyleVarbit < attackStyles.length) {
+            return attackStyles[currentAttackStyleVarbit];
+        }
+
+        return AttackStyle.ACCURATE;
+    }
+
     private int getWeaponSpeed()
     {
         ItemStats weaponStats = getWeaponStats();
         ItemEquipmentStats e = weaponStats.getEquipment();
 
-        return e.getAspeed(); // Deadline for next available attack.
+        int speed = e.getAspeed();
+        if (getAttackStyle() == AttackStyle.RANGING &&
+            client.getVarpValue(VarPlayer.ATTACK_STYLE) == 1) { // Hack for index 1 => rapid
+            speed -= 1; // Assume ranging == rapid.
+        }
+
+        return speed; // Deadline for next available attack.
     }
 
     private boolean isPlayerAttacking()
@@ -104,9 +125,54 @@ public class AttackTimerMetronomePlugin extends Plugin implements KeyListener
     private void performAttack()
     {
         attackState = AttackState.DELAYED;
-        tickCounter = 0;
-        tickPeriod = getWeaponSpeed();
+        attackDelayHoldoffTicks = getWeaponSpeed();
+        tickPeriod = attackDelayHoldoffTicks;
+        uiUnshowDebounceTickCount = uiUnshowDebounceTicksMax;
     }
+
+    public int getTicksUntilNextAttack()
+    {
+        return 1 + attackDelayHoldoffTicks;
+    }
+
+    public int getWeaponPeriod()
+    {
+        return tickPeriod;
+    }
+
+    public boolean isAttackCooldownPending()
+    {
+        return (attackState == AttackState.DELAYED) || uiUnshowDebounceTickCount > 0;
+    }
+
+    @Subscribe
+    public void onChatMessage(ChatMessage event)
+    {
+        if (event.getType() != ChatMessageType.SPAM)
+        {
+            return;
+        }
+
+        final String message = event.getMessage();
+
+        if (message.startsWith("You eat") ||
+                message.startsWith("You drink the wine")) {
+            int attackDelay = (message.toLowerCase().contains("karambwan")) ?
+                    KARAMBWAN_ATTACK_DELAY_TICKS :
+                    DEFAULT_FOOD_ATTACK_DELAY_TICKS;
+
+            if (attackState == AttackState.DELAYED) {
+                attackDelayHoldoffTicks += attackDelay;
+            }
+        }
+    }
+
+    @Subscribe
+    public void onAnimationChanged(AnimationChanged anim)
+    {
+        client.addChatMessage(ChatMessageType.GAMEMESSAGE, "","animID: " + String.valueOf(anim.getActor().getAnimation()), null);
+    }
+
     @Subscribe
     public void onInteractingChanged(InteractingChanged interactingChanged)
     {
@@ -123,12 +189,10 @@ public class AttackTimerMetronomePlugin extends Plugin implements KeyListener
                     // an instant attack. If its queued, don't trigger the cooldown yet.
                     if (isPlayerAttacking()) {
                        performAttack();
-                    } else {
-                        attackState = AttackState.PENDING;
                     }
                     break;
 
-                case PENDING:
+                //case PENDING:
                 case DELAYED:
                     // Don't reset tick counter or tick period.
                     break;
@@ -139,81 +203,36 @@ public class AttackTimerMetronomePlugin extends Plugin implements KeyListener
     @Subscribe
     public void onGameTick(GameTick tick)
     {
-        // Tick count == 1 means to cycle through configured colors.
-
-        // changes color every tick
-        // Color cycle is the number of ticks.
+        boolean isAttacking = isPlayerAttacking(); // Heuristic for attacking based on animation.
 
         switch (attackState) {
-            case PENDING:
-                if (isPlayerAttacking()) {
+            case NOT_ATTACKING:
+                if (isAttacking) {
                     performAttack(); // Sets state to DELAYED.
+                } else {
+                    uiUnshowDebounceTickCount--;
                 }
                 break;
-            case NOT_ATTACKING:
-                return;
+            case DELAYED:
+                if (attackDelayHoldoffTicks <= 0) { // Eligible for a new attack
+                    if (isAttacking) {
+                        // Found an attack animation. Assume auto attack triggered.
+                        performAttack();
+                    } else {
+                        // No attack animation; assume no attack.
+                        attackState = AttackState.NOT_ATTACKING;
+                    }
+                }
         }
 
-        if (tickCounter >= tickPeriod)
-        {
-            tickCounter = 0;
-            // Update attack state; if attacking, set to delayed. Else, no attack.
-
-            if (isPlayerAttacking()) {
-                // Found an attack animation. Assume auto attack triggered.
-                attackState = AttackState.DELAYED;
-            } else {
-                // No attack animation; assume no attack.
-                attackState = AttackState.NOT_ATTACKING;
-                return;
-            }
-        }
-
-        tickCounter++;
-
-        // Index into color array.
-        switch (tickCounter)
-        {
-            case 1:
-                CurrentColor = config.getTickColor();
-                break;
-            case 2:
-                CurrentColor = config.getTockColor();
-                break;
-            case 3:
-                CurrentColor = config.getTick3Color();
-                break;
-            case 4:
-                CurrentColor = config.getTick4Color();
-                break;
-            case 5:
-                CurrentColor = config.getTick5Color();
-                break;
-            case 6:
-                CurrentColor = config.getTick6Color();
-                break;
-            case 7:
-                CurrentColor = config.getTick7Color();
-                break;
-            case 8:
-                CurrentColor = config.getTick8Color();
-                break;
-            case 9:
-                CurrentColor = config.getTick9Color();
-                break;
-            case 10:
-                CurrentColor = config.getTick10Color();
-        }
+        attackDelayHoldoffTicks--;
     }
 
 
     @Subscribe
     public void onConfigChanged(ConfigChanged event)
     {
-        if (tickCounter > config.colorCycle())
-        {
-            tickCounter = 0;
-        }
+        attackDelayHoldoffTicks = 0;
         DEFAULT_SIZE = new Dimension(config.boxWidth(), config.boxWidth());
     }
 
@@ -223,7 +242,7 @@ public class AttackTimerMetronomePlugin extends Plugin implements KeyListener
         overlayManager.add(overlay);
         overlay.setPreferredSize(DEFAULT_SIZE);
         overlayManager.add(tileOverlay);
-        keyManager.registerKeyListener(this);
+        overlayManager.add(barOverlay);
     }
 
     @Override
@@ -231,25 +250,7 @@ public class AttackTimerMetronomePlugin extends Plugin implements KeyListener
     {
         overlayManager.remove(overlay);
         overlayManager.remove(tileOverlay);
-        tickCounter = 0;
-        keyManager.unregisterKeyListener(this);
-    }
-
-    //hotkey settings
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
-
-    @Override
-    public void keyPressed(KeyEvent e)
-    {
-        if (config.tickResetHotkey().matches(e))
-        {
-            tickCounter = 0;
-        }
-    }
-
-    @Override
-    public void keyReleased(KeyEvent e) {
+        overlayManager.remove(barOverlay);
+        attackDelayHoldoffTicks = 0;
     }
 }
