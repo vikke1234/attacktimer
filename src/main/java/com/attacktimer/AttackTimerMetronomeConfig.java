@@ -23,58 +23,18 @@ public interface AttackTimerMetronomeConfig extends Config
 		return true;
 	}
 
-	@ConfigItem(
-			position = 2,
-			keyName = "highlightCurrentTile",
-			name = "Enable True Tile Overlay",
-			description = "Highlights true player tile using the metronome colors (replacement for tile indicator plugin setting)"
-	)
-	default boolean highlightCurrentTile()
-	{
-		return false;
-	}
-
-
-	@Range(
-			min = 16
-	)
-	@ConfigItem(
-			position = 3,
-			keyName = "boxWidth",
-			name = "Default Box Size (Alt + Right Click Box)",
-			description = "Configure the default length and width of the box. Use alt + right click on the box to reset to the size specified"
-	)
-	default int boxWidth()
-	{
-		return 25;
-	}
-
-	@Range(
-			min = 1
-	)
-	@ConfigItem(
-			position = 4,
-			keyName = "tickCount",
-			name = "Tick Count",
-			description = "The tick on which the color changes (Only supports two colors)"
-	)
-	default int tickCount()
-	{
-		return 1;
-	}
-
 	@ConfigSection(
-			name = "Tick Number Settings",
-			description = "Change Tick Number settings",
-			position = 5
+			name = "Attack Cooldown Tick Settings",
+			description = "Change attack tick cooldown settings",
+			position = 2
 	)
-	String TickNumberSettings = "Tick Number Settings";
+	String TickNumberSettings = "Attack Cooldown Tick Settings";
 
 	@ConfigItem(
 			position = 1,
 			keyName = "showTick",
-			name = "Show Metronome Tick Number",
-			description = "Shows current tick number on the metronome",
+			name = "Show Attack Cooldown Ticks",
+			description = "Shows number of ticks until next attack",
 			section = TickNumberSettings
 	)
 	default boolean showTick()
@@ -82,20 +42,9 @@ public interface AttackTimerMetronomeConfig extends Config
 		return false;
 	}
 
-	@ConfigItem(
-			position = 2,
-			keyName = "showPlayerTick",
-			name = "Show Tick Number Above Player",
-			description = "Shows current tick number above the player",
-			section = TickNumberSettings
-	)
-	default boolean showPlayerTick()
-	{
-		return false;
-	}
 
 	@ConfigItem(
-			position = 3,
+			position = 2,
 			keyName = "disableFontScaling",
 			name = "Disable Font Size Scaling (Metronome Tick Only)",
 			description = "Disables font size scaling for metronome tick number",
@@ -114,7 +63,7 @@ public interface AttackTimerMetronomeConfig extends Config
 			position = 4,
 			keyName = "fontSize",
 			name = "Font Size (Overhead Tick Only)",
-			description = "Change the font size of the overhead Tick Number",
+			description = "Change the font size of the overhead attack cooldown ticks",
 			section = TickNumberSettings
 	)
 	default int fontSize()
@@ -142,38 +91,6 @@ public interface AttackTimerMetronomeConfig extends Config
 			section = TickNumberSettings
 	)
 	default FontTypes fontType() { return FontTypes.REGULAR; }
-
-	@ConfigSection(
-			name = "True Tile Overlay Settings",
-			description = "Settings only applied to True Tile Overlay",
-			position = 6
-	)
-	String TileSettings = "True Tile Overlay Settings";
-
-	@Alpha
-	@ConfigItem(
-			position = 1,
-			keyName = "currentTileFillColor",
-			name = "True Tile Fill Color",
-			description = "Fill color of the true tile overlay",
-			section = TileSettings
-	)
-	default Color currentTileFillColor()
-	{
-		return new Color(0, 0, 0, 50);
-	}
-
-	@ConfigItem(
-			position = 2,
-			keyName = "currentTileBorderWidth",
-			name = "True Tile Border Width",
-			description = "Border size of the true tile overlay",
-			section = TileSettings
-	)
-	default double currentTileBorderWidth()
-	{
-		return 2;
-	}
 
 	@ConfigSection(
 			name = "Attack Bar",

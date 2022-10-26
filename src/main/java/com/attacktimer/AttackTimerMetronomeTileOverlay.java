@@ -46,24 +46,7 @@ public class AttackTimerMetronomeTileOverlay extends Overlay
             return null;
         }
 
-        if (config.highlightCurrentTile())
-        {
-            final WorldPoint playerPos = client.getLocalPlayer().getWorldLocation();
-            if (playerPos == null)
-            {
-                return null;
-            }
-
-            final LocalPoint playerPosLocal = LocalPoint.fromWorld(client, playerPos);
-            if (playerPosLocal == null)
-            {
-                return null;
-            }
-
-            renderTile(graphics, playerPosLocal, plugin.CurrentColor, config.currentTileFillColor(), config.currentTileBorderWidth());
-        }
-
-        if (config.showPlayerTick())
+        if (config.showTick())
         {
             if (config.fontType() == FontTypes.REGULAR)
             {

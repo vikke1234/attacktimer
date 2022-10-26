@@ -37,10 +37,7 @@ public class AttackTimerMetronomePlugin extends Plugin
     private ConfigManager configManager;
 
     @Inject
-    private AttackTimerMetronomeTileOverlay tileOverlay;
-
-    @Inject
-    private FullResizableAttackTimerMetronomeOverlay overlay;
+    private AttackTimerMetronomeTileOverlay overlay;
 
     @Inject
     private AttackTimerBarOverlay barOverlay;
@@ -168,12 +165,6 @@ public class AttackTimerMetronomePlugin extends Plugin
     }
 
     @Subscribe
-    public void onAnimationChanged(AnimationChanged anim)
-    {
-        client.addChatMessage(ChatMessageType.GAMEMESSAGE, "","animID: " + String.valueOf(anim.getActor().getAnimation()), null);
-    }
-
-    @Subscribe
     public void onInteractingChanged(InteractingChanged interactingChanged)
     {
         Actor source = interactingChanged.getSource();
@@ -233,7 +224,6 @@ public class AttackTimerMetronomePlugin extends Plugin
     public void onConfigChanged(ConfigChanged event)
     {
         attackDelayHoldoffTicks = 0;
-        DEFAULT_SIZE = new Dimension(config.boxWidth(), config.boxWidth());
     }
 
     @Override
@@ -241,7 +231,6 @@ public class AttackTimerMetronomePlugin extends Plugin
     {
         overlayManager.add(overlay);
         overlay.setPreferredSize(DEFAULT_SIZE);
-        overlayManager.add(tileOverlay);
         overlayManager.add(barOverlay);
     }
 
@@ -249,7 +238,6 @@ public class AttackTimerMetronomePlugin extends Plugin
     protected void shutDown() throws Exception
     {
         overlayManager.remove(overlay);
-        overlayManager.remove(tileOverlay);
         overlayManager.remove(barOverlay);
         attackDelayHoldoffTicks = 0;
     }
