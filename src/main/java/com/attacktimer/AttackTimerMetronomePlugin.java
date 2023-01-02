@@ -103,6 +103,10 @@ public class AttackTimerMetronomePlugin extends Plugin
     private int getWeaponSpeed()
     {
         ItemStats weaponStats = getWeaponStats();
+        if (weaponStats == null) {
+            return 4; // Assume barehanded == 4t
+        }
+
         ItemEquipmentStats e = weaponStats.getEquipment();
 
         int speed = e.getAspeed();
