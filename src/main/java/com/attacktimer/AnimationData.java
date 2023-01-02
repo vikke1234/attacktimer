@@ -46,6 +46,10 @@ public enum AnimationData
     MELEE_SWORD_STAB(386, AttackStyle.STAB), // tested w/ dragon sword, obby sword, d long
     MELEE_SCIM_SLASH(390, AttackStyle.SLASH), // tested w/ rune & dragon scim, d sword, VLS, obby sword
 
+    MELEE_LANCE_STAB(8288, AttackStyle.STAB),
+    MELEE_LANCE_CRUSH(8290, AttackStyle.CRUSH),
+    MELEE_LANCE_SLASH(8289, AttackStyle.SLASH),
+
     MELEE_FANG_STAB(9471, AttackStyle.STAB), // tested w/ fang
     MELEE_FANG_SPEC(6118, AttackStyle.STAB, true), // tested w/ fang spec
 
@@ -100,6 +104,7 @@ public enum AnimationData
     MELEE_ANCIENT_GODSWORD_SPEC(9171, AttackStyle.SLASH, true),
 
     // RANGED
+    RANGED_CHINCHOMPA(7618, AttackStyle.RANGED),
     RANGED_SHORTBOW(426, AttackStyle.RANGED), // Confirmed same w/ 3 types of arrows, w/ maple, magic, & hunter's shortbow, craw's bow, dbow, dbow spec
     RANGED_RUNE_KNIFE_PVP(929, AttackStyle.RANGED), // 1 tick animation, has 1 tick delay between attacks. likely same for all knives. Same for morrigan's javelins, both spec & normal attack.
     RANGED_MAGIC_SHORTBOW_SPEC(1074, AttackStyle.RANGED, true),
