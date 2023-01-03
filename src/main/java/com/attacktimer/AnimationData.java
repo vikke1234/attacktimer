@@ -136,10 +136,10 @@ public enum AnimationData
 
     private static final Map<Integer, AnimationData> DATA;
 
-    public int animationId;
-    public boolean isSpecial;
-    public AttackStyle attackStyle;
-    public int baseSpellDamage;
+    public final int animationId;
+    public final boolean isSpecial;
+    public final AttackStyle attackStyle;
+    public final int baseSpellDamage;
 
     // Simple animation data constructor for all melee and range attacks
     AnimationData(int animationId, AttackStyle attackStyle)

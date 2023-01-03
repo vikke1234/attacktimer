@@ -9,7 +9,6 @@ import net.runelite.client.events.ConfigChanged;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
-import net.runelite.client.plugins.itemstats.FoodBase;
 import net.runelite.client.ui.overlay.OverlayManager;
 import javax.inject.Inject;
 import net.runelite.http.api.item.ItemEquipmentStats;
@@ -28,7 +27,7 @@ public class AttackTimerMetronomePlugin extends Plugin
         NOT_ATTACKING,
         DELAYED,
         //PENDING,
-    };
+    }
 
     @Inject
     private OverlayManager overlayManager;
@@ -191,7 +190,7 @@ public class AttackTimerMetronomePlugin extends Plugin
                 case DELAYED:
                     // Don't reset tick counter or tick period.
                     break;
-            };
+            }
         }
     }
 
