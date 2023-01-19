@@ -102,6 +102,8 @@ public enum AnimationData
     MELEE_SCYTHE(8056, AttackStyle.SLASH), // tested w/ all scythe styles (so could be crush, but unlikely)
     MELEE_GHAZI_RAPIER_STAB(8145, AttackStyle.STAB), // rapier slash is 390, basic slash animation. Also VLS stab.
     MELEE_ANCIENT_GODSWORD_SPEC(9171, AttackStyle.SLASH, true),
+    MELEE_CRYSTAL_HALBERD_SPEC(1203, AttackStyle.SLASH, true),
+
 
     // RANGED
     RANGED_CHINCHOMPA(7618, AttackStyle.RANGED),
@@ -132,7 +134,8 @@ public enum AnimationData
     MAGIC_STANDARD_SURGE_STAFF(7855, AttackStyle.MAGIC, 24), // tested many staves
     MAGIC_ANCIENT_SINGLE_TARGET(1978, AttackStyle.MAGIC, 26), // Rush & Blitz animations (tested all 8, different weapons)
     MAGIC_ANCIENT_MULTI_TARGET(1979, AttackStyle.MAGIC, 30), // Burst & Barrage animations (tested all 8, different weapons)
-    MAGIC_VOLATILE_NIGHTMARE_STAFF_SPEC(8532, AttackStyle.MAGIC, 66); // assume 99 mage's base damage (does not rise when boosted).
+    MAGIC_VOLATILE_NIGHTMARE_STAFF_SPEC(8532, AttackStyle.MAGIC, 66), // assume 99 mage's base damage (does not rise when boosted).
+    MAGIC_TUMEKENS_SHADOW(9493, AttackStyle.MAGIC);
 
     private static final Map<Integer, AnimationData> DATA;
 
