@@ -42,7 +42,7 @@ public class AttackTimerMetronomeTileOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        if (plugin.attackState != AttackTimerMetronomePlugin.AttackState.DELAYED) {
+        if (plugin.getTicksUntilNextAttack() == plugin.getWeaponPeriod()) {
             return null;
         }
 

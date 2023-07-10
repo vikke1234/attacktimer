@@ -67,6 +67,8 @@ public class AttackTimerMetronomePlugin extends Plugin
 
     private final int DEFAULT_FOOD_ATTACK_DELAY_TICKS = 3;
     private final int KARAMBWAN_ATTACK_DELAY_TICKS = 2;
+
+
     public Dimension DEFAULT_SIZE = new Dimension(DEFAULT_SIZE_UNIT_PX, DEFAULT_SIZE_UNIT_PX);
 
     @Provides
@@ -132,7 +134,7 @@ public class AttackTimerMetronomePlugin extends Plugin
 
     public int getTicksUntilNextAttack()
     {
-        return 1 + attackDelayHoldoffTicks;
+        return attackDelayHoldoffTicks;
     }
 
     public int getWeaponPeriod()
@@ -142,7 +144,36 @@ public class AttackTimerMetronomePlugin extends Plugin
 
     public boolean isAttackCooldownPending()
     {
-        return (attackState == AttackState.DELAYED) || uiUnshowDebounceTickCount > 0;
+        return (attackState == AttackState.DELAYED) || attackDelayHoldoffTicks > 1;
+    }
+
+    @Subscribe(priority = 3)
+    public void onAnimationChanged(AnimationChanged animation) {
+        Actor actor = animation.getActor();
+        boolean isPlayer = actor instanceof Player;
+        boolean isLocalPlayer = actor.equals(client.getLocalPlayer());
+        boolean attackTicks = attackDelayHoldoffTicks > 1;
+
+        if (isPlayer || isLocalPlayer) {
+            return;
+        }
+
+        if (attackTicks) {
+            return;
+        }
+
+        if(isPlayerAttacking()) {
+            performAttack();
+        }
+    }
+
+    @Subscribe
+    public void onGameTick(GameTick tick)
+    {
+        if (attackDelayHoldoffTicks >= 1) {
+            System.out.println("tick: " + attackDelayHoldoffTicks);
+            attackDelayHoldoffTicks--;
+        }
     }
 
     @Subscribe
@@ -170,56 +201,6 @@ public class AttackTimerMetronomePlugin extends Plugin
     @Subscribe
     public void onInteractingChanged(InteractingChanged interactingChanged)
     {
-        Actor source = interactingChanged.getSource();
-        Actor target = interactingChanged.getTarget();
-
-        Player p = client.getLocalPlayer();
-
-        if (source.equals(p) && (target instanceof NPC)) {
-
-            switch (attackState) {
-                case NOT_ATTACKING:
-                    // If not previously attacking, this action can result in a queued attack or
-                    // an instant attack. If its queued, don't trigger the cooldown yet.
-                    if (isPlayerAttacking()) {
-                       performAttack();
-                    }
-                    break;
-
-                //case PENDING:
-                case DELAYED:
-                    // Don't reset tick counter or tick period.
-                    break;
-            }
-        }
-    }
-
-    @Subscribe
-    public void onGameTick(GameTick tick)
-    {
-        boolean isAttacking = isPlayerAttacking(); // Heuristic for attacking based on animation.
-
-        switch (attackState) {
-            case NOT_ATTACKING:
-                if (isAttacking) {
-                    performAttack(); // Sets state to DELAYED.
-                } else {
-                    uiUnshowDebounceTickCount--;
-                }
-                break;
-            case DELAYED:
-                if (attackDelayHoldoffTicks <= 0) { // Eligible for a new attack
-                    if (isAttacking) {
-                        // Found an attack animation. Assume auto attack triggered.
-                        performAttack();
-                    } else {
-                        // No attack animation; assume no attack.
-                        attackState = AttackState.NOT_ATTACKING;
-                    }
-                }
-        }
-
-        attackDelayHoldoffTicks--;
     }
 
 
