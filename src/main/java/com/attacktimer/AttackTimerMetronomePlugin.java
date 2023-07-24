@@ -30,9 +30,6 @@ public class AttackTimerMetronomePlugin extends Plugin
     private OverlayManager overlayManager;
 
     @Inject
-    private ConfigManager configManager;
-
-    @Inject
     private AttackTimerMetronomeTileOverlay overlay;
 
     @Inject
@@ -51,19 +48,19 @@ public class AttackTimerMetronomePlugin extends Plugin
 
     final int ATTACK_DELAY_NONE = 0;
 
-    private int uiUnshowDebounceTicksMax = 1;
-
     public int attackDelayHoldoffTicks = ATTACK_DELAY_NONE;
 
     public AttackState attackState = AttackState.NOT_ATTACKING;
-
-    public Color CurrentColor = Color.WHITE;
 
     public int DEFAULT_SIZE_UNIT_PX = 25;
 
     private final int DEFAULT_FOOD_ATTACK_DELAY_TICKS = 3;
     private final int KARAMBWAN_ATTACK_DELAY_TICKS = 2;
 
+    /**
+     * Tracks whether an animation and game tick happens on the same game tick.
+     */
+    private boolean isSameTick = false;
 
     public Dimension DEFAULT_SIZE = new Dimension(DEFAULT_SIZE_UNIT_PX, DEFAULT_SIZE_UNIT_PX);
 
@@ -100,20 +97,22 @@ public class AttackTimerMetronomePlugin extends Plugin
         return (attackState == AttackState.DELAYED) || attackDelayHoldoffTicks > 1;
     }
 
-    @Subscribe(priority = 3)
+    @Subscribe()
     public void onAnimationChanged(AnimationChanged animation) {
         Actor actor = animation.getActor();
         boolean isPlayer = actor instanceof Player;
         boolean isLocalPlayer = actor.equals(client.getLocalPlayer());
         boolean attackTicks = attackDelayHoldoffTicks > 1;
-
-        if (isPlayer || isLocalPlayer) {
+        if (!isPlayer || !isLocalPlayer) {
             return;
         }
 
         if (attackTicks) {
             return;
         }
+
+        isSameTick = true;
+        int id = actor.getAnimation();
 
         if(isPlayerAttacking()) {
             performAttack();
@@ -123,8 +122,15 @@ public class AttackTimerMetronomePlugin extends Plugin
     @Subscribe
     public void onGameTick(GameTick tick)
     {
-        if (attackDelayHoldoffTicks >= 1) {
-            System.out.println("tick: " + attackDelayHoldoffTicks);
+        overlay.shouldRender = true;
+        if (isSameTick) {
+            // don't reduce timer on the same gametick
+            isSameTick = false;
+            return;
+        }
+        System.out.println("tick " + attackDelayHoldoffTicks);
+
+        if (attackDelayHoldoffTicks > 0) {
             attackDelayHoldoffTicks--;
         }
     }
@@ -154,6 +160,7 @@ public class AttackTimerMetronomePlugin extends Plugin
     @Subscribe
     public void onInteractingChanged(InteractingChanged interactingChanged)
     {
+        // TODO add ignoreable NPCs
     }
 
 

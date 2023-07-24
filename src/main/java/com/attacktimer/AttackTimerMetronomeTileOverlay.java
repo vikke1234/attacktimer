@@ -15,7 +15,7 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Polygon;
 import java.awt.Font;
-import net.runelite.api.coords.WorldPoint;
+
 import net.runelite.client.ui.overlay.OverlayLayer;
 import net.runelite.client.ui.overlay.OverlayPriority;
 
@@ -26,6 +26,8 @@ public class AttackTimerMetronomeTileOverlay extends Overlay
     private final Client client;
     private final AttackTimerMetronomeConfig config;
     private final AttackTimerMetronomePlugin plugin;
+
+    public boolean shouldRender = false;
 
     @Inject
     public AttackTimerMetronomeTileOverlay(Client client, AttackTimerMetronomeConfig config, AttackTimerMetronomePlugin plugin)
@@ -42,12 +44,13 @@ public class AttackTimerMetronomeTileOverlay extends Overlay
     @Override
     public Dimension render(Graphics2D graphics)
     {
-        if (plugin.getTicksUntilNextAttack() == plugin.getWeaponPeriod()) {
+        if (plugin.attackDelayHoldoffTicks == 0 && shouldRender) {
+            shouldRender = false;
             return null;
         }
-
         if (config.showTick())
         {
+            int ticksRemaining = plugin.getTicksUntilNextAttack();
             if (config.fontType() == FontTypes.REGULAR)
             {
                 graphics.setFont(new Font(FontManager.getRunescapeFont().getName(), Font.PLAIN, config.fontSize()));
@@ -63,7 +66,6 @@ public class AttackTimerMetronomeTileOverlay extends Overlay
 
             // Countdown ticks instead of up.
             // plugin.tickCounter => ticksRemaining
-            int ticksRemaining = plugin.getTicksUntilNextAttack();
             OverlayUtil.renderTextLocation(graphics, playerPoint, String.valueOf(ticksRemaining), config.NumberColor());
         }
 
