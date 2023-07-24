@@ -6,13 +6,10 @@ import net.runelite.api.events.*;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.events.ConfigChanged;
-import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
 import javax.inject.Inject;
-import net.runelite.http.api.item.ItemEquipmentStats;
-import net.runelite.http.api.item.ItemStats;
 
 import java.awt.*;
 
@@ -45,7 +42,7 @@ public class AttackTimerMetronomePlugin extends Plugin
     private AttackTimerMetronomeConfig config;
 
     @Inject
-    private ItemManager itemManager;
+    private ItemUtils itemUtils;
 
     @Inject
     private Client client;
@@ -54,7 +51,6 @@ public class AttackTimerMetronomePlugin extends Plugin
 
     final int ATTACK_DELAY_NONE = 0;
 
-    private int uiUnshowDebounceTickCount = 0;
     private int uiUnshowDebounceTicksMax = 1;
 
     public int attackDelayHoldoffTicks = ATTACK_DELAY_NONE;
@@ -77,48 +73,6 @@ public class AttackTimerMetronomePlugin extends Plugin
         return configManager.getConfig(AttackTimerMetronomeConfig.class);
     }
 
-    private ItemStats getItemStatsFromContainer(ItemContainer container, int slotID)
-    {
-        final Item item = container.getItem(slotID);
-        return item != null ? itemManager.getItemStats(item.getId(), false) : null;
-    }
-    private ItemStats getWeaponStats()
-    {
-        return getItemStatsFromContainer(client.getItemContainer(InventoryID.EQUIPMENT),
-                EquipmentInventorySlot.WEAPON.getSlotIdx());
-    }
-
-    private AttackStyle getAttackStyle()
-    {
-        final int currentAttackStyleVarbit = client.getVarpValue(VarPlayer.ATTACK_STYLE);
-        final int currentEquippedWeaponTypeVarbit = client.getVarbitValue(Varbits.EQUIPPED_WEAPON_TYPE);
-        AttackStyle[] attackStyles = WeaponType.getWeaponType(currentEquippedWeaponTypeVarbit).getAttackStyles();
-
-        if (currentAttackStyleVarbit < attackStyles.length) {
-            return attackStyles[currentAttackStyleVarbit];
-        }
-
-        return AttackStyle.ACCURATE;
-    }
-
-    private int getWeaponSpeed()
-    {
-        ItemStats weaponStats = getWeaponStats();
-        if (weaponStats == null) {
-            return 4; // Assume barehanded == 4t
-        }
-
-        ItemEquipmentStats e = weaponStats.getEquipment();
-
-        int speed = e.getAspeed();
-        if (getAttackStyle() == AttackStyle.RANGING &&
-            client.getVarpValue(VarPlayer.ATTACK_STYLE) == 1) { // Hack for index 1 => rapid
-            speed -= 1; // Assume ranging == rapid.
-        }
-
-        return speed; // Deadline for next available attack.
-    }
-
     private boolean isPlayerAttacking()
     {
         return AnimationData.fromId(client.getLocalPlayer().getAnimation()) != null;
@@ -127,9 +81,8 @@ public class AttackTimerMetronomePlugin extends Plugin
     private void performAttack()
     {
         attackState = AttackState.DELAYED;
-        attackDelayHoldoffTicks = getWeaponSpeed();
+        attackDelayHoldoffTicks = itemUtils.getWeaponSpeed();
         tickPeriod = attackDelayHoldoffTicks;
-        uiUnshowDebounceTickCount = uiUnshowDebounceTicksMax;
     }
 
     public int getTicksUntilNextAttack()
