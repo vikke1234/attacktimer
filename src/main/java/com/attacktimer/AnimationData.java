@@ -113,6 +113,7 @@ public enum AnimationData
     RANGED_CROSSBOW_PVP(4230, AttackStyle.RANGED), // Tested RCB & ACB w/ dragonstone bolts (e) & diamond bolts (e)
     RANGED_BLOWPIPE(5061, AttackStyle.RANGED), // tested in PvP with all styles. Has 1 tick delay between animations in pvp.
     RANGED_DARTS(6600, AttackStyle.RANGED), // tested w/ addy darts. Seems to be constant animation but sometimes stalls and doesn't animate
+    RANGED_DRAGON_DARTS(7554, AttackStyle.RANGED),
     RANGED_BALLISTA(7218, AttackStyle.RANGED), // Tested w/ dragon javelins.
     RANGED_DRAGON_THROWNAXE_SPEC(7521, AttackStyle.RANGED, true),
     RANGED_RUNE_CROSSBOW(7552, AttackStyle.RANGED),
